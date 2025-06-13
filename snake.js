@@ -42,10 +42,52 @@ function draw() {
     ctx.fillRect(obs.x * gridSize, obs.y * gridSize, gridSize, gridSize);
   });
 
-  // Draw the snake
-  ctx.fillStyle = '#4B006E'; // Dark purple color
-  snake.forEach(segment => {
-    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+  // Draw the snake: head with rounded top oriented to movement, square bottom; body as squares
+  snake.forEach((segment, index) => {
+    if (index === 0) {
+      // Determine head direction
+      let angle = 0;
+      if (snake.length > 1) {
+        const next = snake[1];
+        const dx = segment.x - next.x;
+        const dy = segment.y - next.y;
+        if (dx === 1) angle = Math.PI / 2;        // moving right (flipped)
+        else if (dx === -1) angle = -Math.PI / 2; // moving left (flipped)
+        else if (dy === 1) angle = Math.PI;       // moving down
+        else if (dy === -1) angle = 0;            // moving up
+      } else {
+        // Default to current direction if only head exists
+        if (direction.x === 1) angle = Math.PI / 2;
+        else if (direction.x === -1) angle = -Math.PI / 2;
+        else if (direction.y === 1) angle = Math.PI;
+        else if (direction.y === -1) angle = 0;
+      }
+
+      ctx.save();
+      ctx.translate(segment.x * gridSize + gridSize / 2, segment.y * gridSize + gridSize / 2);
+      ctx.rotate(angle);
+
+      ctx.fillStyle = '#4B006E'; // Dark purple color
+      ctx.beginPath();
+      // Draw top semicircle (rounded part)
+      ctx.arc(0, -gridSize / 4, gridSize / 2, Math.PI, 0, false);
+      // Draw lines down to bottom corners (flat side)
+      ctx.lineTo(gridSize / 2, gridSize / 2);
+      ctx.lineTo(-gridSize / 2, gridSize / 2);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    } else {
+      // Draw body as squares
+      ctx.fillStyle = '#4B006E'; // Same color for body
+      ctx.fillRect(
+        segment.x * gridSize,
+        segment.y * gridSize,
+        gridSize,
+        gridSize
+      );
+    }
   });
 
   // Draw the score
